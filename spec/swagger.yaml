@@ -1,238 +1,382 @@
-openapi: 3.0.0
+swagger: '2.0'
 info:
-  title: Clik/ZConnect API
-  description: 'TODO: Add a description'
-  version: 1.0
-servers:
-- url: http://www.example.com
-  variables: {}
+  version: '1.0.0'
+  title: Thing FSM - API for  allowing IoT devices to notify service management software of faults
+  description: >-
+    API specification to allow IoT platforms to push IoT device service alerts and faults to FSM software. Created as an open standard.
+    
+    
+    This documents a set of endpoints which should be exposed by the service management software, however does not dictate how the events should be processed by the FSM software, or if a job should be raised. 
+    
+    
+    IoT platforms can implement web-hooks which corrispond to this API in order to transfer events to FSM software in a standardised way.
+    
+    
+    Definitions:
+      - **FSM** - The field service management software, we refer to this as the API holder.
+      - **IoT Platform** - The IoT platform which wishes to send events to the FSM software.
+    
+    Created by [ZConnect](https://zconnect.io) for the good of the industry.
+  license:
+    name: MIT
+    url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
+host: www.example.com
+basePath: /api/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
 paths:
-  /api/v1/acount/{account_guid}/device/{device_guid}/alert:
+  /account/{account_guid}/device/{device_guid}/alert:
     post:
+      description: >-
+        When there has been a fault detected with a machine, a new alert can be raised in the ZConnect. This will generate a HTTP request to the FSM servers on this URL to indicate that a fault has been detected.
+
+        The response to one of these requests should indicate if a new or existing job has been linked to this alert and give some relevant information which will aid users of the ZConnect platform in accessing the information in FSM software.
+      summary: New device alert
       tags:
       - Device Alerts
-      summary: New device alert
-      description: >-
-        When there has been some kind of fault detected with a machine, a new alert can be raised in the ZConnect. This will generate a HTTP request to the Clik servers on this URL to indicate that a fault has been detected.
-
-        The response to one of these requests should indicate if a new or existing job has been linked to this alert and give some relevant information which will aid users of the ZConnect platform in accessing the information in Clik.
-      operationId: NewDeviceAlert
+      operationId: New device alert
+      produces:
+      - application/json
       parameters:
       - name: account_guid
         in: path
-        description: A GUID string for the user's account on Clik
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2
+        type: string
+        description: A GUID string for the user's account on the FSM side
       - name: device_guid
         in: path
-        description: A GUID string for the device
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: be44724a-dd19-4a92-8066-a4d3f18b66b9
+        type: string
+        description: A GUID string for the device
       - name: alert_guid
         in: query
+        required: true
+        type: string
         description: A GUID which is generated for a specific job on a machine
+      - name: body
+        in: body
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: 76c47b63-a259-4a0c-b4b3-06a702500d58
-      requestBody:
         description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AlertRequest'
-        required: true
+        schema:
+          $ref: '#/definitions/AlertRequest'
       responses:
         200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlertResponse'
+          description: ''
+          schema:
+            $ref: '#/definitions/AlertResponse'
         404:
           description: ''
-      deprecated: false
+          schema: {}
+      x-unitTests:
+      - request:
+          method: POST
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert?alert_guid=76c47b63-a259-4a0c-b4b3-06a702500d58
+          headers:
+            Content-Type: application/json
+          body: '{  "alert_priority": "emergency",  "description": "There has been an explosion in fridge #5"}'
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in <FSM>",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: New device alert1
+        x-testDescription: >-
+          When there has been some kind of fault detected with a machine, a new alert can be raised in the ZConnect. This will generate a HTTP request to the FSM servers on this URL to indicate that a fault has been detected.
+
+          The response to one of these requests should indicate if a new or existing job has been linked to this alert and give some relevant information which will aid users of the ZConnect platform in accessing the information in the FSM software.
+      - request:
+          method: POST
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert?alert_guid=76c47b63-a259-4a0c-b4b3-06a702500d58
+          headers:
+            Content-Type: application/json
+          body: '{  "alert_priority": "emergency",  "description": "There has been an explosion in fridge #5"}'
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in <FSM>",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: New device alert2
+        x-testDescription: >-
+          When there has been some kind of fault detected with a machine, a new alert can be raised in the ZConnect. This will generate a HTTP request to the FSM servers on this URL to indicate that a fault has been detected.
+
+          The response to one of these requests should indicate if a new or existing job has been linked to this alert and give some relevant information which will aid users of the ZConnect platform in accessing the information in FSM.
+      - request:
+          method: POST
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert?alert_guid=76c47b63-a259-4a0c-b4b3-06a702500d58
+          headers:
+            Content-Type: application/json
+          body: '{  "alert_priority": "emergency",  "description": "There has been an explosion in fridge #5"}'
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in <FSM>",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: New device alert3
+        x-testDescription: >-
+          When there has been some kind of fault detected with a machine, a new alert can be raised in the ZConnect. This will generate a HTTP request to the FSM servers on this URL to indicate that a fault has been detected.
+
+          The response to one of these requests should indicate if a new or existing job has been linked to this alert and give some relevant information which will aid users of the ZConnect platform in accessing the information in the FSM software.
       x-operation-settings:
         CollectParameters: false
         AllowDynamicQueryParameters: false
         AllowDynamicFormParameters: false
         IsMultiContentStreaming: false
-  /api/v1/acount/{account_guid}/device/{device_guid}/alert/{alert_guid}:
+  /account/{account_guid}/device/{device_guid}/alert/{alert_guid}:
     get:
+      description: From time-to-time it may be useful to be able to fetch the latest status of an alert, e.g. if an update is to be attempted, it might be worth checking that an engineer is not already on site etc.
+      summary: Get device alert
       tags:
       - Device Alerts
-      summary: Get device alert
-      description: From time-to-time it may be useful to be able to fetch the latest status of an alert, e.g. if an update is to be attempted, it might be worth checking that an engineer is not already on site etc.
-      operationId: GetDeviceAlert
+      operationId: Get device alert
+      produces:
+      - application/json
       parameters:
       - name: account_guid
         in: path
-        description: A GUID string for the user's account on Clik
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2
+        type: string
+        description: A GUID string for the user's account on FSM
       - name: device_guid
         in: path
-        description: A GUID string for the device
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: be44724a-dd19-4a92-8066-a4d3f18b66b9
+        type: string
+        description: A GUID string for the device
       - name: alert_guid
         in: path
-        description: A GUID which is generated for a specific job on a machine
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: 76c47b63-a259-4a0c-b4b3-06a702500d58
+        type: string
+        description: A GUID which is generated for a specific job on a machine
       responses:
         200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlertResponse'
+          description: ''
+          schema:
+            $ref: '#/definitions/AlertResponse'
         404:
           description: ''
-      deprecated: false
+          schema: {}
+      x-unitTests:
+      - request:
+          method: GET
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert/76c47b63-a259-4a0c-b4b3-06a702500d58
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in FSM",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: Get device alert1
+        x-testDescription: From time-to-time it may be useful to be able to fetch the latest status of an alert, e.g. if an update is to be attempted, it might be worth checking that an engineer is not already on site etc.
       x-operation-settings:
         CollectParameters: false
         AllowDynamicQueryParameters: false
         AllowDynamicFormParameters: false
         IsMultiContentStreaming: false
     post:
+      description: When ZConnect needs to provide new information for a fault which has developed over time, or the status needs to be changed, an update will be attempted on an existing alert.
+      summary: Update device alert
       tags:
       - Device Alerts
-      summary: Update device alert
-      description: When ZConnect needs to provide new information for a fault which has developed over time, or the status needs to be changed, an update will be attempted on an existing alert.
-      operationId: UpdateDeviceAlert
+      operationId: Update device alert
+      produces:
+      - application/json
       parameters:
       - name: account_guid
         in: path
-        description: A GUID string for the user's account on Clik
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2
+        type: string
+        description: A GUID string for the user's account on FSM
       - name: device_guid
         in: path
-        description: A GUID string for the device
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: be44724a-dd19-4a92-8066-a4d3f18b66b9
+        type: string
+        description: A GUID string for the device
       - name: alert_guid
         in: path
+        required: true
+        type: string
         description: A GUID which is generated for a specific job on a machine
+      - name: body
+        in: body
         required: true
-        style: matrix
-        explode: false
-        schema:
-          type: string
-        example: 76c47b63-a259-4a0c-b4b3-06a702500d58
-      requestBody:
         description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AlertRequest'
-        required: true
+        schema:
+          $ref: '#/definitions/AlertRequest'
       responses:
         200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlertResponse'
+          description: ''
+          schema:
+            $ref: '#/definitions/AlertResponse'
         423:
           description: ''
+          schema: 
+            $ref: '#/definitions/Error'
         404:
           description: ''
-      deprecated: false
+          schema:
+            $ref: '#/definitions/Error'
+      x-unitTests:
+      - request:
+          method: POST
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert/76c47b63-a259-4a0c-b4b3-06a702500d58
+          headers:
+            Content-Type: application/json
+          body: '{  "alert_priority": "emergency",  "description": "There has been an explosion in fridge #5"}'
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in <FSM>",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: Update device alert1
+        x-testDescription: When ZConnect needs to provide new information for a fault which has developed over time, or the status needs to be changed, an update will be attempted on an existing alert.
+      - request:
+          method: POST
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert/76c47b63-a259-4a0c-b4b3-06a702500d58
+          headers:
+            Content-Type: application/json
+          body: '{  "alert_priority": "emergency",  "description": "There has been an explosion in fridge #5"}'
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in <FSM>",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: Update device alert2
+        x-testDescription: When ZConnect needs to provide new information for a fault which has developed over time, or the status needs to be changed, an update will be attempted on an existing alert.
+      - request:
+          method: POST
+          uri: /api/v1/acount/a70fcc3a-3ad5-42ed-9b13-dfd1331e97f2/device/be44724a-dd19-4a92-8066-a4d3f18b66b9/alert/76c47b63-a259-4a0c-b4b3-06a702500d58
+          headers:
+            Content-Type: application/json
+          body: '{  "alert_priority": "emergency",  "description": "There has been an explosion in fridge #5"}'
+        expectedResponse:
+          x-allowExtraHeaders: true
+          x-bodyMatchMode: RAW
+          x-arrayOrderedMatching: false
+          x-arrayCheckCount: false
+          x-matchResponseSchema: true
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: '"<TOKEN>"'
+          body: '{  "alert_guid": "76c47b63-a259-4a0c-b4b3-06a702500d58",  "links": [    {      "href": "ios://deep/app/link",      "title": "View job in <FSM>",      "rel": "ios"    }  ],  "status": "opened"}'
+        x-testShouldPass: true
+        x-testEnabled: true
+        x-testName: Update device alert3
+        x-testDescription: When ZConnect needs to provide new information for a fault which has developed over time, or the status needs to be changed, an update will be attempted on an existing alert.
       x-operation-settings:
         CollectParameters: false
         AllowDynamicQueryParameters: false
         AllowDynamicFormParameters: false
         IsMultiContentStreaming: false
-components:
-  schemas:
-    Error:
-      title: Error
-      required:
-      - title
-      type: object
-      properties:
-        title:
-          type: string
-          description: Machine identifiable error code
-        description:
-          type: string
-          description: Human readable error description
-    AlertRequest:
-      title: AlertRequest
-      required:
-      - description
-      type: object
-      properties:
-        description:
-          type: string
-          description: A description which will contain a human readable description, formated as plain text (with new lines etc).
-        alert_priority:
-          description: A string from a set of options [`emergency`, `warning`, `advisory`, `information`] which indicates how important this alert is
-          $ref: '#/components/schemas/AlertPriority'
-    AlertPriority:
-      title: alert_priority
-      enum:
-      - emergency
-      - warning
-      - advisory
-      - information
-      type: string
-    Link:
-      title: Link
-      type: object
-      properties:
-        href:
-          type: string
-          description: A url to open
-        title:
-          type: string
-          description: A suitable title
-        rel:
-          type: string
-          description: A machine identifiable string which contains info about what this link is for, e.g. `ios-app` or `web`.
-    AlertResponse:
-      title: AlertResponse
-      required:
-      - alert_guid
-      type: object
-      properties:
-        alert_guid:
-          type: string
-          description: A reference which ZConnect can use to get the status of this alert/job. It may be easier to make this a job id if a job is always raised.
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
-          description: Links for viewing more information about this in Clik
-        status:
-          type: string
-          description: A status to show for this alert/job. tbc
+definitions:
+  Error:
+    title: Error
+    type: object
+    properties:
+      title:
+        description: Machine identifiable error code
+        type: string
+      description:
+        description: Human readable error description
+        type: string
+    required:
+    - title
+  AlertRequest:
+    title: AlertRequest
+    type: object
+    properties:
+      description:
+        description: A description which will contain a human readable description, formated as plain text (with new lines etc).
+        type: string
+      alert_priority:
+        $ref: '#/definitions/AlertPriority'
+    required:
+    - description
+  AlertPriority:
+    title: alert_priority
+    type: string
+    enum:
+    - emergency
+    - warning
+    - advisory
+    - information
+  Link:
+    title: Link
+    type: object
+    properties:
+      href:
+        description: A url to open
+        type: string
+      title:
+        description: A suitable title
+        type: string
+      rel:
+        description: A machine identifiable string which contains info about what this link is for, e.g. `ios-app` or `web`.
+        type: string
+  AlertResponse:
+    title: AlertResponse
+    type: object
+    properties:
+      alert_guid:
+        description: A reference which ZConnect can use to get the status of this alert/job. It may be easier to make this a job id if a job is always raised.
+        type: string
+      links:
+        description: Links for viewing more information about this in the FSM
+        type: array
+        items:
+          $ref: '#/definitions/Link'
+      status:
+        description: A status to show for this alert/job. tbc
+        type: string
+    required:
+    - alert_guid
