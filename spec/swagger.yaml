@@ -1,10 +1,9 @@
 swagger: '2.0'
-x-logo: radar_logo.png
 info:
   version: '1.0.0'
   title: Thing FSM - API for  allowing IoT devices to notify service management software of faults
   description: >-
-    API specification to allow IoT platforms to push IoT device service alerts and faults to FSM software. Created as an open standard.
+    API specification to allow IoT platforms to push IoT device service alerts and faults to FSM software. It's primary been created to allow the creation of 'early warning systems' which permit predictive mainenance and remote diagnosis of faults for service engineers. It's been created as an open standard so that all companies in the eco-system can integrate once.
     
     
     This documents a set of endpoints which should be exposed by the service management software, however does not dictate how the events should be processed by the FSM software, or if a job should be raised. 
@@ -23,6 +22,9 @@ info:
   license:
     name: MIT
     url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
+  x-logo: 
+    url: radar_logo.png
+    backgroundColor: "#FAFAFA"
 host: www.example.com
 basePath: /api/v1
 schemes:
