@@ -126,9 +126,11 @@ definitions:
       title:
         description: Machine identifiable error code
         type: string
+        example: "Not Found"
       description:
         description: Human readable error description
         type: string
+        example: "The resource does not exist"
     required:
     - title
   Event:
@@ -138,6 +140,7 @@ definitions:
       description:
         description: A description which will contain a human readable description, formated as plain text (with new lines etc).
         type: string
+        example: "The efficiency has dropped below 90% of the expected value indicating a system fault"
       event_type:
         $ref: '#/definitions/EventType'
     required:
@@ -150,6 +153,7 @@ definitions:
     - warning
     - advisory
     - information
+    example: warning
   Link:
     title: Link
     type: object
@@ -157,12 +161,19 @@ definitions:
       href:
         description: A url to open
         type: string
+        example: "https://example.com/job/101"
       title:
         description: A suitable title
         type: string
+        example: "Service Job 101"
       rel:
         description: A machine identifiable string which contains info about what this link is for, e.g. `ios-app` or `web`.
         type: string
+        example: "job-web"
+        enum:
+          - job-ios
+          - job-android
+          - job-web
   EventResponse:
     title: EventResponse
     type: object
@@ -170,14 +181,20 @@ definitions:
       alert_guid:
         description: A reference which the IoT platform can use to get the status of this event/job. It may be easier to make this a job id if a job is always raised.
         type: string
+        example: fsm-101
       links:
         description: Links for viewing more information about this in the FSM
         type: array
         items:
           $ref: '#/definitions/Link'
       status:
-        description: A status to show for this event/job. tbc
+        description: A status to show for this event/job, can be any string
         type: string
+        example: "open"
+      open:
+        description: A Boolean indicating if the job/ticket is open or closed in a machine readable form, since the status is a human readable string.
+        type: boolean
+        example: true
     required:
     - alert_guid
     
@@ -198,21 +215,23 @@ parameters:
     in: path
     required: true
     type: string
-    description: A GUID string for the user's account on FSM
+    description: "A GUID string for the user's account on FSM"
+    x-example: "da9f7fbc-eb42-4f4a-a464-318fcfae0fc6"
   device_guid:
     name: device_guid
     in: path
     required: true
     type: string
-    description: A GUID string for the device
+    description: "A GUID string for the device"
+    x-example: "7b1e83a1-212c-489c-af54-ffdf2af55882"
   event_guid:
     name: event_guid
     in: path
     required: true
     type: string
-    description: A GUID which is generated for a specific event/job on a machine
-  
-
+    description: "A GUID which is generated for a specific event/job on a machine"
+    x-example: "7b1e83a1-212c-489c-af54-ffdf2af55882"
+    
 securityDefinitions:
   API Token:
     type: apiKey
