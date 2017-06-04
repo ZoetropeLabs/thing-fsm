@@ -1,18 +1,15 @@
 # Thing FSM (Field Service Management) OpenAPI Specification
 [![Build Status](https://travis-ci.org/ZoetropeLabs/thing-fsm.svg?branch=master)](https://travis-ci.org/ZoetropeLabs/thing-fsm)
 
-## Steps to finish
+this is an API specification to allow IoT platforms to push IoT device service alerts and faults to FSM (Field service management) software. It's been created as an open standard to allow interoperable IoT and FSM systems where each system will only need to implement once in order to gain broad compatibility.
+    
+This documents a set of endpoints which should be exposed by the service management software, however does not dictate how the events should be processed by the FSM software, though in most cases it's expected that `warning` or greater level events will be raised as service jobs automatically.
 
-1. Enable [Travis](https://docs.travis-ci.com/user/getting-started/#To-get-started-with-Travis-CI%3A) for your repository (**note**: you already have `.travis.yml` file)
-2. [Create GitHub access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/); check `public_repo` on `Select scopes` section.
-3. Use the token value as a value for [Travis environment variable](https://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings) with the name `GH_TOKEN`
-4. Make a test commit to trigger CI: `git commit --allow-empty -m "Test Travis CI" && git push`
-5. Wait until Travis build is finished. You can check progress by clicking on the `Build Status` badge at the top
-6. If you did everything correct, https://zoetropelabs.github.io/thing-fsm/ will lead to your new docs
-7. **[Optional]** You can setup [custom domain](https://help.github.com/articles/using-a-custom-domain-with-github-pages/) (just create `web/CNAME` file)
-8. Start writing/editing your OpenAPI spec: check out [usage](#usage) section below
-9. **[Optional]** If you document public API consider adding it into [APIs.guru](https://APIs.guru) directory using [this form](https://apis.guru/add-api/).
-10. Delete this section :smile:
+FSM and IoT service providers are encouraged to help shape the development of this standard by raising pull requests and getting involved with suggestions. We're currently working towards a 1.0.0 release, however implementations of this standard are already underway.
+
+IoT platforms can implement web-hooks which corrispond to this API in order to transfer events to FSM software in a standardised way.
+
+Created by [ZConnect](https://zconnect.io) for the good of the industry.
 
 ## Links
 
@@ -41,3 +38,5 @@
 **TIP:** you can open `swagger-editor`, documentation and `swagger-ui` in parallel
 5. Once you finish with the changes you can run tests using: `npm test`
 6. Share you changes with the rest of the world by pushing to GitHub :smile:
+
+API to allow IoT platforms to push IoT device service alerts and faults to FSM software. Created as an open standard for the good of the industry
