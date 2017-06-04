@@ -1,4 +1,5 @@
 swagger: '2.0'
+x-logo: radar_logo.png
 info:
   version: '1.0.0'
   title: Thing FSM - API for  allowing IoT devices to notify service management software of faults
@@ -17,6 +18,8 @@ info:
       - **IoT Platform** - The IoT platform which wishes to send events to the FSM software.
     
     Created by [ZConnect](https://zconnect.io) for the good of the industry.
+
+    Logo Attribution under CC: [Radar by Kenneth Chua](https://thenounproject.com/inkentation/collection/radar/?oq=radar&cidx=0&i=467346) from the Noun Project
   license:
     name: MIT
     url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
