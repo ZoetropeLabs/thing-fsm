@@ -1,0 +1,319 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Thing FSM - API for  allowing IoT devices to notify service management software of faults",
+    "description": "API specification to allow IoT platforms to push IoT device service alerts and faults to FSM software. It's primary been created to allow the creation of 'early warning systems' which permit predictive mainenance and remote diagnosis of faults for service engineers. It's been created as an open standard so that all companies in the eco-system can integrate once.\n\nThis documents a set of endpoints which should be exposed by the service management software, however does not dictate how the events should be processed by the FSM software, or if a job should be raised. \n\nIoT platforms can implement web-hooks which corrispond to this API in order to transfer events to FSM software in a standardised way.\n\nDefinitions:\n  - **FSM** - The field service management software, we refer to this as the API holder.\n  - **IoT Platform** - The IoT platform which wishes to send events to the FSM software.\n\nCreated by [ZConnect](https://zconnect.io) for the good of the industry.\nLogo Attribution under CC: [Radar by Kenneth Chua](https://thenounproject.com/inkentation/collection/radar/?oq=radar&cidx=0&i=467346) from the Noun Project",
+    "license": {
+      "name": "MIT",
+      "url": "http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
+    },
+    "x-logo": {
+      "url": "radar_logo.png",
+      "backgroundColor": "#FAFAFA"
+    }
+  },
+  "host": "www.example.com",
+  "basePath": "/api/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/account/{account_guid}/device/{device_guid}/event": {
+      "post": {
+        "description": "When there has been a fault detected with a machine, a new event can be raised by the IoT platform to allow this to be acted upon in the FSM software. This will generate a HTTPS request to the FSM servers on this URL to indicate that a fault has been detected.\n\nThe response to one of these requests should indicate if a new or existing job has been linked to this event and give some relevant information which will aid users of the IoT platform in accessing the information in FSM software.\n\nThe event is sent by the IoT platfom. Currently this is just a description an an event type which may be used to raise a new job for that event, however in future this will be expanded to allow reporting metadata, such as the component which has failed etc. It's the responsibility of the FSM software to decide if a new job should be raised, which is likely to be as simple as only raising jobs for the more severe `event_type` values.",
+        "summary": "New device alert",
+        "tags": [
+          "Device Events"
+        ],
+        "operationId": "New device event",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/account_guid"
+          },
+          {
+            "$ref": "#/parameters/device_guid"
+          },
+          {
+            "name": "event_guid",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "A GUID which is generated for a specific job on a machine"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Event"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "An alert has been created",
+            "schema": {
+              "$ref": "#/definitions/EventResponse"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/authenticationError"
+          }
+        }
+      }
+    },
+    "/account/{account_guid}/device/{device_guid}/event/{event_guid}": {
+      "get": {
+        "description": "From time-to-time it may be useful to be able to fetch the latest status of an alert, e.g. if an update is to be attempted, it might be worth checking that an engineer is not already on site etc.",
+        "summary": "Get device alert",
+        "tags": [
+          "Device Events"
+        ],
+        "operationId": "Get device alert",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/account_guid"
+          },
+          {
+            "$ref": "#/parameters/device_guid"
+          },
+          {
+            "$ref": "#/parameters/event_guid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/EventResponse"
+            }
+          },
+          "404": {
+            "$ref": "#/responses/notFoundError"
+          }
+        }
+      },
+      "post": {
+        "description": "When the IoT device needs to provide new information for a fault which has developed over time, or the status needs to be changed, an update will be attempted on an existing event.",
+        "summary": "Update device event",
+        "tags": [
+          "Device Events"
+        ],
+        "operationId": "Update device event",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/account_guid"
+          },
+          {
+            "$ref": "#/parameters/device_guid"
+          },
+          {
+            "$ref": "#/parameters/event_guid"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Event"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event has been updated",
+            "schema": {
+              "$ref": "#/definitions/EventResponse"
+            }
+          },
+          "404": {
+            "$ref": "#/responses/notFoundError"
+          },
+          "423": {
+            "description": "The e",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Error": {
+      "title": "Error",
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "Machine identifiable error code",
+          "type": "string",
+          "example": "Not Found"
+        },
+        "description": {
+          "description": "Human readable error description",
+          "type": "string",
+          "example": "The resource does not exist"
+        }
+      },
+      "required": [
+        "title"
+      ]
+    },
+    "Event": {
+      "title": "Event",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "A description which will contain a human readable description, formated as plain text (with new lines etc).",
+          "type": "string",
+          "example": "The efficiency has dropped below 90% of the expected value indicating a system fault"
+        },
+        "event_type": {
+          "$ref": "#/definitions/EventType"
+        }
+      },
+      "required": [
+        "description"
+      ]
+    },
+    "EventType": {
+      "title": "Event Type",
+      "type": "string",
+      "enum": [
+        "emergency",
+        "warning",
+        "advisory",
+        "information"
+      ],
+      "example": "warning"
+    },
+    "Link": {
+      "title": "Link",
+      "type": "object",
+      "properties": {
+        "href": {
+          "description": "A url to open",
+          "type": "string",
+          "example": "https://example.com/job/101"
+        },
+        "title": {
+          "description": "A suitable title",
+          "type": "string",
+          "example": "Service Job 101"
+        },
+        "rel": {
+          "description": "A machine identifiable string which contains info about what this link is for, e.g. `ios-app` or `web`.",
+          "type": "string",
+          "example": "job-web",
+          "enum": [
+            "job-ios",
+            "job-android",
+            "job-web"
+          ]
+        }
+      }
+    },
+    "EventResponse": {
+      "title": "EventResponse",
+      "type": "object",
+      "properties": {
+        "alert_guid": {
+          "description": "A reference which the IoT platform can use to get the status of this event/job. It may be easier to make this a job id if a job is always raised.",
+          "type": "string",
+          "example": "fsm-101"
+        },
+        "links": {
+          "description": "Links for viewing more information about this in the FSM",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          }
+        },
+        "status": {
+          "description": "A status to show for this event/job, can be any string",
+          "type": "string",
+          "example": "open"
+        },
+        "open": {
+          "description": "A Boolean indicating if the job/ticket is open or closed in a machine readable form, since the status is a human readable string.",
+          "type": "boolean",
+          "example": true
+        }
+      },
+      "required": [
+        "alert_guid"
+      ]
+    }
+  },
+  "responses": {
+    "authenticationError": {
+      "description": "The request could not be authenticated",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "notFoundError": {
+      "description": "The requested resource does not exist",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    }
+  },
+  "parameters": {
+    "account_guid": {
+      "name": "account_guid",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "A GUID string for the user's account on FSM",
+      "x-example": "da9f7fbc-eb42-4f4a-a464-318fcfae0fc6"
+    },
+    "device_guid": {
+      "name": "device_guid",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "A GUID string for the device",
+      "x-example": "7b1e83a1-212c-489c-af54-ffdf2af55882"
+    },
+    "event_guid": {
+      "name": "event_guid",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "A GUID which is generated for a specific event/job on a machine",
+      "x-example": "7b1e83a1-212c-489c-af54-ffdf2af55882"
+    }
+  },
+  "securityDefinitions": {
+    "API Token": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "A secret access token",
+      "description": "This API should be secured using an API token, and relys on the API being secured with HTTPS. The specification does not dictate anything about these API keys, however it's suggested that a suitbly long unique string is used for each different client and that these can be revoked if required. The IoT platform will need to store this API key securely in config."
+    }
+  },
+  "security": [
+    {
+      "API Token": []
+    }
+  ]
+}

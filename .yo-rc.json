@@ -1,0 +1,11 @@
+{
+  "generator-openapi-repo": {
+    "importExistingSpec": true,
+    "importedSpec": "spec.yaml",
+    "name": "Thing FSM (Field Service Management)",
+    "repo": "ZoetropeLabs/thing-fsm",
+    "splitSpec": false,
+    "samples": true,
+    "installSwaggerUI": true
+  }
+}
